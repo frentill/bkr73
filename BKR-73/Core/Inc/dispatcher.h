@@ -8,17 +8,15 @@
 #ifndef INC_DISPATCHER_H_
 #define INC_DISPATCHER_H_
 
-#define TOGGLE_BOARD_LED()       ledCnt += Tauz;                          \
-			                     if (ledCnt >= ledPeriod)                 \
-			                     {                                        \
-			                         LL_GPIO_TogglePin(GPIOC, SD_Pin);    \
-			                         ledCnt = 0;                          \
-			                     }
 
 #include "main.h"
+
+void Dispatcher_Thread_A0(void);
+void Dispatcher_Thread_B0(void);
+
+extern void (*Dispatcher_Thread_Ptr)(void);
 
 void DispatcherInit(void);
 
 void DispatcherRun(void);
-
 #endif /* INC_DISPATCHER_H_ */
