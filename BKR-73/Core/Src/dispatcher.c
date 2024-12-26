@@ -36,7 +36,9 @@ void Dispatcher_Thread_B0(void)
 	{
 		LL_TIM_ClearFlag_UPDATE(TIM2);
 
+		AppReadRemoteData();
 
+		AppSendRemoteData();
 
 		status_led = (AppState.Remote.IsOK) ? &AppState.Led1s : &AppState.Led100ms;
 

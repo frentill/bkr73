@@ -28,6 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_ll_adc.h"
+#include "stm32f4xx_ll_dma.h"
 #include "stm32f4xx_ll_rcc.h"
 #include "stm32f4xx_ll_bus.h"
 #include "stm32f4xx_ll_system.h"
@@ -35,7 +36,6 @@ extern "C" {
 #include "stm32f4xx_ll_cortex.h"
 #include "stm32f4xx_ll_utils.h"
 #include "stm32f4xx_ll_pwr.h"
-#include "stm32f4xx_ll_dma.h"
 #include "stm32f4xx_ll_spi.h"
 #include "stm32f4xx_ll_tim.h"
 #include "stm32f4xx_ll_usart.h"
@@ -165,7 +165,10 @@ void Error_Handler(void);
 #endif
 
 /* USER CODE BEGIN Private defines */
+#define NUM_CHANNELS 8
+#define NUM_SAMPLES 8
 
+extern int16_t dma_buffer[NUM_SAMPLES * NUM_CHANNELS];
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

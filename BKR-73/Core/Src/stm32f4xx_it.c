@@ -211,6 +211,29 @@ void ADC_IRQHandler(void)
   /* USER CODE END ADC_IRQn 1 */
 }
 
+/**
+  * @brief This function handles DMA2 stream0 global interrupt.
+  */
+void DMA2_Stream0_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
+	 if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
+	        LL_DMA_ClearFlag_TC0(DMA2);  // Clear the transfer complete flag
+
+	        // Process the new data from the DMA buffer
+	        for (int i = 0; i < NUM_CHANNELS; i++) {
+	            // For each channel, retrieve the corresponding ADC value from the buffer
+	            int16_t adc_value = dma_buffer[i];  // Get the latest sample from the buffer
+
+				// @TODO????
+	        }
+	    }
+  /* USER CODE END DMA2_Stream0_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream0_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
