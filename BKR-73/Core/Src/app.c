@@ -17,7 +17,7 @@ ApplicationState_t AppState =  {
 	.Led1s = {0,0,1000,},
 	.Led500ms = {0,0,500,},
 	.Led100ms = {0,0,100,},
-	.Leds = {0,0,0,0,0,},
+	.Leds = {0,0,LED_MODE_FOREVER,LED_MODE_FOREVER,LED_MODE_1s,},
 };
 void AppReadRemoteData()
 {

@@ -40,22 +40,7 @@ void Dispatcher_Thread_B0(void)
 		AppReadRemoteData();
 
 
-		if(AppState.Remote.R1) {
-			AppState.Leds.CH1     = LED_MODE_500ms;
-			AppState.Leds.CH2     = LED_MODE_DISABLED;
-		} else if(AppState.Remote.R2) {
-			AppState.Leds.CH1     = LED_MODE_DISABLED;
-			AppState.Leds.CH2     = LED_MODE_500ms;
-		} else if(AppState.Remote.R1_2) {
-			AppState.Leds.CH1     = LED_MODE_500ms;
-			AppState.Leds.CH2     = LED_MODE_500ms;
-		}
-
-		if(AppState.Remote.PPZ) {
-			AppState.Leds.Allow     = LED_MODE_FOREVER;
-		} else {
-			AppState.Leds.Allow     = LED_MODE_DISABLED;
-		}
+		// @TODO
 
 		AppSendRemoteData();
 
