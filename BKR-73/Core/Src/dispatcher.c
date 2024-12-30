@@ -18,6 +18,8 @@ void Dispatcher_Thread_A0(void)
     if (__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE)) {
         __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
 
+        //HAL_GPIO_TogglePin(GPIOC, KT1_Pin);
+
 		// @TODO: read DIGITAL inputs
 	}
 
@@ -34,11 +36,30 @@ void Dispatcher_Thread_B0(void)
     if (__HAL_TIM_GET_FLAG(&htim2, TIM_FLAG_UPDATE)) {
         __HAL_TIM_CLEAR_FLAG(&htim2, TIM_FLAG_UPDATE);
 
+        //HAL_GPIO_TogglePin(GPIOC, KT2_Pin);
 		AppReadRemoteData();
+
+
+		if(AppState.Remote.R1) {
+			AppState.Leds.CH1     = LED_MODE_500ms;
+			AppState.Leds.CH2     = LED_MODE_DISABLED;
+		} else if(AppState.Remote.R2) {
+			AppState.Leds.CH1     = LED_MODE_DISABLED;
+			AppState.Leds.CH2     = LED_MODE_500ms;
+		} else if(AppState.Remote.R1_2) {
+			AppState.Leds.CH1     = LED_MODE_500ms;
+			AppState.Leds.CH2     = LED_MODE_500ms;
+		}
+
+		if(AppState.Remote.PPZ) {
+			AppState.Leds.Allow     = LED_MODE_FOREVER;
+		} else {
+			AppState.Leds.Allow     = LED_MODE_DISABLED;
+		}
 
 		AppSendRemoteData();
 
-		status_led = (!AppState.Remote.IsOK) ? &AppState.Led1s : &AppState.Led100ms;
+		status_led = (AppState.Remote.IsOK) ? &AppState.Led1s : &AppState.Led100ms;
 
 		if(status_led->state)    HAL_GPIO_WritePin(GPIOC, SD_Pin, GPIO_PIN_SET);
 		else                     HAL_GPIO_WritePin(GPIOC, SD_Pin, GPIO_PIN_RESET);

@@ -24,6 +24,11 @@ void AppReadRemoteData()
 	while (__HAL_UART_GET_FLAG(&huart4, UART_FLAG_RXNE) && AppState.Remote.rxIndex < REMOTE_RX_BUFFER_SIZE) {
 	    // Read the received byte and store it in the buffer
 	    AppState.Remote.rxBuffer[AppState.Remote.rxIndex++] = (uint8_t)huart4.Instance->DR;
+
+
+	    if (__HAL_UART_GET_FLAG(&huart4, UART_FLAG_ORE)) {
+			__HAL_UART_CLEAR_OREFLAG(&huart4); // Clear overrun error flag
+		}
 	}
 
 
@@ -31,15 +36,16 @@ void AppReadRemoteData()
 	{
 		uint8_t cmd = AppState.Remote.rxBuffer[0];
 
-		AppState.Remote.Abort   = (cmd | REMOTE_ABORT)   ? 1 : 0;
-		AppState.Remote.Prepare = (cmd | REMOTE_PREPARE) ? 1 : 0;
-		AppState.Remote.MC      = (cmd | REMOTE_MC_VC)   ? 1 : 0;
-		AppState.Remote.VC      = (cmd | REMOTE_MC_VC)   ? 0 : 1;
-		AppState.Remote.R1      = (cmd | REMOTE_R1)      ? 1 : 0;
-		AppState.Remote.R1_2    = (cmd | REMOTE_R1_2)    ? 1 : 0;
-		AppState.Remote.R2      = (cmd | REMOTE_R2)      ? 1 : 0;
-		AppState.Remote.PPZ     = (cmd | REMOTE_PPZ)     ? 1 : 0;
+		AppState.Remote.Abort   = (cmd & REMOTE_ABORT)   ? 1 : 0;
+		AppState.Remote.Prepare = (cmd & REMOTE_PREPARE) ? 0 : 1;
+		AppState.Remote.MC      = (cmd & REMOTE_MC_VC)   ? 1 : 0;
+		AppState.Remote.VC      = (cmd & REMOTE_MC_VC)   ? 0 : 1;
+		AppState.Remote.R1      = (cmd & REMOTE_R1)      ? 1 : 0;
+		AppState.Remote.R1_2    = (cmd & REMOTE_R1_2)    ? 1 : 0;
+		AppState.Remote.R2      = (cmd & REMOTE_R2)      ? 1 : 0;
+		AppState.Remote.PPZ     = (cmd & REMOTE_PPZ)     ? 0 : 1;
 		AppState.Remote.Timer = 0;   // reset error timer countdown
+		AppState.Remote.IsOK = 1;
 	}
 
 	AppState.Remote.rxIndex = 0;
@@ -47,6 +53,8 @@ void AppReadRemoteData()
 
 void AppSendRemoteData()
 {
+	HAL_GPIO_WritePin(GPIOB, REMOTE_DE1_Pin, GPIO_PIN_SET);
+
 	uint8_t data = 0;
 
 	UPDATE_LED_DATA(data, AppState.Leds.Allow, REMOTE_ALLOW);
@@ -58,6 +66,8 @@ void AppSendRemoteData()
 	if (__HAL_UART_GET_FLAG(&huart4, UART_FLAG_TXE)) {
 	    HAL_UART_Transmit(&huart4, &data, 1, HAL_MAX_DELAY);
 	}
+
+	HAL_GPIO_WritePin(GPIOB, REMOTE_DE1_Pin, GPIO_PIN_RESET);
 }
 
 void AppUpdateTimers()
