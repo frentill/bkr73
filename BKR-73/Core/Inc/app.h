@@ -98,17 +98,6 @@ typedef struct LedControl_s {
 	uint32_t max;
 }LedControl_t;
 
-typedef struct ACD_s {
-	int32_t SIN;    // IN0
-	int32_t COS;    // IN1
-	int32_t Omega1; // IN2
-	int32_t Omega2; // IN3
-	int32_t F1;     // IN9
-	int32_t Az;     // IN10
-	int32_t F2;     // IN11
-	int32_t D;      // IN13
-}ACD_t;
-
 
 typedef enum LedItem_e {
     LED_MODE_DISABLED = 0,

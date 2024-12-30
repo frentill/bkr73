@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "app.h"
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,7 +56,8 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern DMA_HandleTypeDef hdma_adc1;
+extern ADC_HandleTypeDef hadc1;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -185,7 +187,7 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
   /* USER CODE END SysTick_IRQn 0 */
-
+  HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
@@ -205,8 +207,12 @@ void ADC_IRQHandler(void)
 {
   /* USER CODE BEGIN ADC_IRQn 0 */
 
+
   /* USER CODE END ADC_IRQn 0 */
+  HAL_ADC_IRQHandler(&hadc1);
   /* USER CODE BEGIN ADC_IRQn 1 */
+
+
 
   /* USER CODE END ADC_IRQn 1 */
 }
@@ -217,19 +223,21 @@ void ADC_IRQHandler(void)
 void DMA2_Stream0_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
-	 if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
-	        LL_DMA_ClearFlag_TC0(DMA2);  // Clear the transfer complete flag
 
-	        // Process the new data from the DMA buffer
-	        for (int i = 0; i < NUM_CHANNELS; i++) {
-	            // For each channel, retrieve the corresponding ADC value from the buffer
-	            int16_t adc_value = dma_buffer[i];  // Get the latest sample from the buffer
-
-				// @TODO????
-	        }
-	    }
   /* USER CODE END DMA2_Stream0_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
   /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
+  const float vk = 3.3f / 4095.0f;
+
+  AppState.Board.Azimuth  = adcData.Az * vk;
+  AppState.Board.Distance = adcData.D * vk;
+  AppState.Board.Epsilon  = adcData.COS * vk + adcData.SIN * vk;
+
+  AppState.CH1.Omega = adcData.Omega1 * vk;
+  AppState.CH1.Phi   = adcData.F1 * vk;
+
+  AppState.CH2.Omega = adcData.Omega2 * vk;
+  AppState.CH2.Phi   = adcData.F2 * vk;
 
   /* USER CODE END DMA2_Stream0_IRQn 1 */
 }

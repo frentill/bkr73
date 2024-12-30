@@ -21,10 +21,11 @@ ApplicationState_t AppState =  {
 };
 void AppReadRemoteData()
 {
-	while (LL_USART_IsActiveFlag_RXNE(UART4) && AppState.Remote.rxIndex < REMOTE_RX_BUFFER_SIZE) {
-		// Read the received byte and store it in the buffer
-		AppState.Remote.rxBuffer[AppState.Remote.rxIndex++] = LL_USART_ReceiveData8(UART4);
+	while (__HAL_UART_GET_FLAG(&huart4, UART_FLAG_RXNE) && AppState.Remote.rxIndex < REMOTE_RX_BUFFER_SIZE) {
+	    // Read the received byte and store it in the buffer
+	    AppState.Remote.rxBuffer[AppState.Remote.rxIndex++] = (uint8_t)huart4.Instance->DR;
 	}
+
 
 	if(AppState.Remote.rxIndex >= 1)
 	{
@@ -38,10 +39,10 @@ void AppReadRemoteData()
 		AppState.Remote.R1_2    = (cmd | REMOTE_R1_2)    ? 1 : 0;
 		AppState.Remote.R2      = (cmd | REMOTE_R2)      ? 1 : 0;
 		AppState.Remote.PPZ     = (cmd | REMOTE_PPZ)     ? 1 : 0;
-
-		AppState.Remote.rxIndex = 0;
 		AppState.Remote.Timer = 0;   // reset error timer countdown
 	}
+
+	AppState.Remote.rxIndex = 0;
 }
 
 void AppSendRemoteData()
@@ -54,8 +55,8 @@ void AppSendRemoteData()
 	UPDATE_LED_DATA(data, AppState.Leds.CH2, REMOTE_CH2);
 	UPDATE_LED_DATA(data, AppState.Leds.Working, REMOTE_WORKING);
 
-	if (LL_USART_IsActiveFlag_TXE(UART4)) {
-		LL_USART_TransmitData8(UART4, data);
+	if (__HAL_UART_GET_FLAG(&huart4, UART_FLAG_TXE)) {
+	    HAL_UART_Transmit(&huart4, &data, 1, HAL_MAX_DELAY);
 	}
 }
 
