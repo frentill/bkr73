@@ -19,6 +19,7 @@ void Dispatcher_Thread_A0(void)
         __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_UPDATE);
 
         //HAL_GPIO_TogglePin(GPIOC, KT1_Pin);
+        AppAcqireDigitalData();
 
 		// @TODO: read DIGITAL inputs
 	}
@@ -40,7 +41,11 @@ void Dispatcher_Thread_B0(void)
 		AppReadRemoteData();
 
 
-		// @TODO
+		if(AppState.Remote.Abort) {
+			AppState.Leds.Allow     = LED_MODE_FOREVER;
+		} else {
+			AppState.Leds.Allow     = LED_MODE_DISABLED;
+		}
 
 		AppSendRemoteData();
 

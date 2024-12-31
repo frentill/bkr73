@@ -18,6 +18,7 @@ ApplicationState_t AppState =  {
 	.Led500ms = {0,0,500,},
 	.Led100ms = {0,0,100,},
 	.Leds = {0,0,LED_MODE_FOREVER,LED_MODE_FOREVER,LED_MODE_1s,},
+	.DigitalAddress = 0,
 };
 void AppReadRemoteData()
 {
@@ -100,4 +101,88 @@ void AppUpdateTimers()
 	} else {
 		AppState.Remote.IsOK = 1;
 	}
+}
+
+
+// Acquiring and glitch filtering binary data connected to gpio via digital muxes
+void AppAcqireDigitalData(void){
+
+	static volatile char filters[8][3] = {
+		    {0, 0, 0},
+		    {0, 0, 0},
+		    {0, 0, 0},
+		    {0, 0, 0},
+		    {0, 0, 0},
+		    {0, 0, 0},
+		    {0, 0, 0},
+		    {0, 0, 0}
+		};
+
+	const char TSHi = 9;
+	const char TSLo = 1;
+
+	uint16_t a = AppState.DigitalAddress;
+
+	switch( a ){
+	case 0 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.NP);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.NP);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.CH1.OPC);
+		break;
+	}
+	case 1 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.Fire);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.Fire);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.CH1.VSK27);
+		break;
+	}
+	case 2 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.ZD);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.ZD);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.CH1.V115);
+		break;
+	}
+	case 3 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.Ready);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.Ready);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.CH2.OPC);
+		break;
+	}
+	case 4 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.Health);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.Health);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.CH2.VSK27);
+		break;
+	}
+	case 5 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.HeadCapture);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.HeadCapture);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.CH2.V115);
+		break;
+	}
+	case 6 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.OK);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.OK);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.Board.APZ);
+		break;
+	}
+	case 7 :
+	{
+		DIGITAL_MUX_PROCESS_PIN(Q0, 0, &AppState.CH1.PPS);
+		DIGITAL_MUX_PROCESS_PIN(Q1, 1, &AppState.CH2.PPS);
+		DIGITAL_MUX_PROCESS_PIN(Q2, 2, &AppState.Board.EmergencyFire);
+		break;
+	}
+	}
+
+	AppState.DigitalAddress ++;
+	if(AppState.DigitalAddress > 7) AppState.DigitalAddress = 0;
+    AppSetDigitalMux(AppState.DigitalAddress);
 }

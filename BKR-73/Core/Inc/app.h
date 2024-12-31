@@ -60,21 +60,31 @@
 
 
 typedef struct RocketChannel_s {
-    char Ready;
-    char HeadCapture;
+    char Ready;         // Висит
+    char HeadCapture;   // ЗГ
     float Omega;
     float Phi;
     float Phi_cor;
-}RocketChannel_s;
+    char NP;            // НП  Неуправляемый пуск = АП (Аварийный
+    char Fire;          // Пуск
+    char ZD;            // ЗД   Запуск двигателя ракеты
+    char Health;        // Испр
+    char OK;            // ОК Открытие клапана = Подготовка
+    char PPS;           // ППС
+
+    char OPC;           // ОПЦ  Отмена ПЦ ?? Будет КЦУ?
+    char VSK27;         // +27ВСК
+    char V115;          // 115V
+}RocketChannel_t;
 
 
 typedef struct BoardChannel_s {
-    char Fire;
-    char EmergencyFire;
+    char EmergencyFire; // Пуск3 ???
     float Distance;
     float Azimuth;
     float Epsilon;
-}RocketChannel_t;
+    char APZ;           // АПЗ
+}BoardChannel_t;
 
 typedef struct RemoteControl_s {
 	char IsOK;
@@ -126,6 +136,15 @@ typedef enum LedItem_e {
         }                                                         \
     } while(0)
 
+#define DIGITAL_MUX_PROCESS_PIN(pin, filter_idx, var_ptr)             \
+    if (HAL_GPIO_ReadPin(pin##_GPIO_Port, pin##_Pin)) {               \
+        if (filters[a][filter_idx] <= TSHi) filters[a][filter_idx]++; \
+        else *(var_ptr) = 1;                                          \
+    } else {                                                          \
+        if (filters[a][filter_idx] >= TSLo) filters[a][filter_idx]--; \
+        else *(var_ptr) = 0;                                          \
+    }
+
 
 typedef struct LedList_s {
 	char Allow;
@@ -139,13 +158,14 @@ typedef struct ApplicationState_s {
 	uint32_t T;
 	uint32_t Tauz;
 	RemoteControl_t Remote;
-	RocketChannel_s CH1;
-	RocketChannel_s CH2;
-	RocketChannel_t Board;
+	RocketChannel_t CH1;
+	RocketChannel_t CH2;
+	BoardChannel_t Board;
 	LedControl_t Led1s;
 	LedControl_t Led500ms;
 	LedControl_t Led100ms;
 	LedList_t Leds;
+	char DigitalAddress;
 }ApplicationState_t;
 
 extern ApplicationState_t AppState;
@@ -153,6 +173,27 @@ extern ApplicationState_t AppState;
 void AppReadRemoteData();
 void AppSendRemoteData();
 void AppUpdateTimers();
+void AppAcqireDigitalData();
 
+
+
+//*************************************************************************
+// Function set addresses on external digital multiplexer                 *
+// By gpio. Argument range is 0...8                                       *
+//                                                                        *
+//*************************************************************************
+static inline void AppSetDigitalMux(uint16_t channel)
+{
+    if(channel & BIT0) HAL_GPIO_WritePin(A0_GPIO_Port, A0_Pin, GPIO_PIN_SET);
+    else               HAL_GPIO_WritePin(A0_GPIO_Port, A0_Pin, GPIO_PIN_RESET);
+
+
+    if(channel & BIT1) HAL_GPIO_WritePin(A1_GPIO_Port, A1_Pin, GPIO_PIN_SET);
+    else               HAL_GPIO_WritePin(A1_GPIO_Port, A2_Pin, GPIO_PIN_RESET);
+
+
+    if(channel & BIT2) HAL_GPIO_WritePin(A2_GPIO_Port, A2_Pin, GPIO_PIN_SET);
+    else               HAL_GPIO_WritePin(A2_GPIO_Port, A2_Pin, GPIO_PIN_RESET);
+}
 
 #endif /* INC_APP_H_ */
